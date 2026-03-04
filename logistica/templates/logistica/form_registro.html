@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header {% if tipo == 'abastecimento' %}bg-warning text-dark{% else %}bg-secondary text-white{% endif %} py-3">
+            <h4 class="mb-0 fw-bold">
+                {% if tipo == 'abastecimento' %}⛽{% else %}📋{% endif %}
+                Registrar {{ titulo }}
+            </h4>
+        </div>
+
+        <div class="card-body p-4">
+            {% if form.errors %}
+            <div class="alert alert-danger shadow-sm">
+                <h6 class="fw-bold">Atenção:</h6>
+                <ul class="mb-0">
+                    {% for field, errors in form.errors.items %}
+                    <li>{{ errors|striptags }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="categoria" value="{{ tipo }}">
+
+                {% if user.is_superuser or user.perfil.e_administrador %}
+                <div class="mb-4 p-3 border rounded bg-light border-primary">
+                    <label class="form-label fw-bold text-primary">🚛 Veículo:</label>
+                    
+                    {% with qs=form.fields.caminhao.queryset %}
+                        {% if qs.count > 1 %}
+                            {# Se houver mais de um, renderiza o SELECT configurado no forms.py #}
+                            {{ form.caminhao }}
+                        {% elif qs.count == 1 %}
+                            {# Exibe a placa travada e envia o ID oculto #}
+                            <input type="text" class="form-control" value="{{ qs.first.placa }}" readonly>
+                            <input type="hidden" name="caminhao" value="{{ qs.first.id }}">
+                        {% else %}
+                            <div class="alert alert-warning py-1 mb-0 small">
+                                Nenhum veículo disponível para sua empresa.
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                
+                    {% if form.caminhao.errors %}
+                        <div class="text-danger small mt-1">{{ form.caminhao.errors }}</div>
+                    {% endif %}
+                </div>
+                {% else %}
+                    {% with meu_caminhao=form.fields.caminhao.queryset.first %}
+                        {% if meu_caminhao %}
+                        <div class="alert alert-info py-2 mb-4 border-info">
+                            <strong>🚛 Veículo:</strong> {{ meu_caminhao.placa }} - {{ meu_caminhao.modelo }}
+                        </div>
+                        <input type="hidden" name="caminhao" value="{{ meu_caminhao.id }}">
+                        {% else %}
+                        <div class="alert alert-danger">
+                            <strong>Erro:</strong> Você não está vinculado a nenhum caminhão. Procure o administrador.
+                        </div>
+                        {% endif %}
+                    {% endwith %}
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold">Data:</label>
+                        <input type="date" name="data" class="form-control" required
+                            value="{% if form.data.value %}{{ form.data.value|date:'Y-m-d' }}{% elif form.initial.data %}{{ form.initial.data|date:'Y-m-d' }}{% endif %}">
+                    </div>
+
+                    {% if tipo == 'abastecimento' %}
+                        <div class="col-12 mb-3">
+                            <div class="alert alert-warning py-2 shadow-sm border-0">
+                                <small><i class="fas fa-info-circle me-1"></i> <strong>Nota:</strong> Se o KM for 0, este registro será ignorado nos cálculos de média.</small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">KM no Painel:</label>
+                            <input type="number" step="0.001" name="km_atual" class="form-control" inputmode="decimal" value="0">
+                            <small class="text-muted">Se não souber, deixe 0</small>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Quantos Litros?</label>
+                            <input type="number" step="0.01" name="litros" class="form-control" inputmode="decimal" placeholder="0,00" value="0">
+                        </div>
+                    {% else %}
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-bold">Descrição / Item:</label>
+                            <input type="text" name="descricao" class="form-control border-secondary shadow-none" placeholder="Ex: Pedágio, Jantar, Manutenção">
+                        </div>
+                    {% endif %}
+
+                    <div class="col-md-12 mb-4">
+                        <label class="form-label fw-bold">Valor Total (R$):</label>
+                        <input type="number" step="0.01" name="valor" inputmode="decimal"
+                            class="form-control form-control-lg shadow-none {% if tipo == 'abastecimento' %}border-warning{% else %}border-secondary{% endif %}"
+                            placeholder="0,00" required>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn {% if tipo == 'abastecimento' %}btn-warning{% else %}btn-secondary text-white{% endif %} btn-lg fw-bold shadow-sm">
+                        Confirmar Lançamento
+                    </button>
+                    <a href="{% url 'escolher_tipo_despesa' %}" class="btn btn-light btn-lg border">
+                        Voltar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card { border-radius: 12px; overflow: hidden; }
+    .card-header { border-bottom: none; }
+    .form-control { padding: 0.75rem; border-width: 2px; }
+    .form-control:focus { background-color: #fff; outline: 0; box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.05); }
+    input[type="date"] { min-height: 50px; }
+</style>
+{% endblock %}  

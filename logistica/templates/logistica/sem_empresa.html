@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <div class="card shadow-lg p-5 border-0 mx-auto" style="max-width: 600px;">
+        <div class="mb-4 text-warning">
+            <i class="fa-solid fa-triangle-exclamation fa-4x"></i>
+        </div>
+        <h2 class="fw-bold mb-3">Acesso Pendente</h2>
+        <p class="lead text-muted">
+            Olá, <strong>{{ user.username }}</strong>. Seu usuário foi criado, mas ainda não está vinculado a nenhuma empresa.
+        </p>
+        <hr class="my-4">
+        <p class="mb-4">
+            Por favor, entre em contato com o <strong>Administrador da sua Empresa</strong> (Dono da Frota) e peça para que ele vincule seu usuário ao sistema.
+        </p>
+        
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-dark btn-lg px-5">
+                <i class="fa-solid fa-arrow-left me-2"></i> Voltar / Sair
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

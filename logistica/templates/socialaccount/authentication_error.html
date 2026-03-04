@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container text-center mt-5">
+    <div class="alert alert-warning border-0 shadow-sm d-inline-block p-4">
+        <h4 class="fw-bold">Login Cancelado</h4>
+        <p class="text-secondary">Você cancelou a autenticação ou ocorreu um erro.</p>
+        <a href="{% url 'account_login' %}" class="btn btn-primary px-4">Tentar novamente</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white fw-bold py-3">
+            <h4 class="mb-0">🚚 Registrar Nova Viagem</h4>
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                {% csrf_token %}
+
+                {% if user.is_superuser or user.perfil.e_administrador %}
+                {# No seu HTML, garanta que você usa a mesma lógica de acesso #}
+                {% if user.is_superuser or user.perfil.e_administrador %}
+                <div class="mb-4 p-3 border rounded bg-light border-primary">
+                    <label class="form-label fw-bold text-primary">🚛 Veículo:</label>
+                    
+                    {% with qs=form.fields.caminhao.queryset %}
+                        {% if qs.count > 1 %}
+                            {{ form.caminhao }}  {# Isso vai renderizar o <select> com os 3 caminhões #}
+                        {% elif qs.count == 1 %}
+                            <input type="text" class="form-control" value="{{ qs.first.placa }}" readonly>
+                            <input type="hidden" name="caminhao" value="{{ qs.first.id }}">
+                        {% else %}
+                            <div class="text-danger small">Nenhum caminhão encontrado para a empresa {{ user.perfil.empresa.nome }}.</div>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+                {% endif %}
+                {% else %}
+                {% with caminhao=form.fields.caminhao.queryset.first %}
+                {% if caminhao %}
+                <div class="alert alert-info py-2">
+                    <strong>Veículo:</strong> {{ caminhao.placa }} - {{ caminhao.modelo }}
+                </div>
+                <input type="hidden" name="caminhao" value="{{ caminhao.id }}">
+                {% else %}
+                <div class="alert alert-danger">
+                    <strong>Erro:</strong> Você não está vinculado a nenhum caminhão no sistema.
+                </div>
+                {% endif %}
+                {% endwith %}
+                {% endif %}
+
+                {# ADICIONE ISSO AQUI PARA VER ERROS CASO NÃO SALVE #}
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    {{ form.errors }}
+                </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Data da Viagem:</label>
+                        <input type="date" name="data" class="form-control" required
+                            value="{% if form.data.value %}{{ form.data.value|date:'Y-m-d' }}{% elif form.initial.data %}{{ form.initial.data|date:'Y-m-d' }}{% endif %}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Motorista:</label>
+                        <input type="text" name="motorista" class="form-control" placeholder="Nome do motorista"
+                            required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Rota / Descrição:</label>
+                    <input type="text" name="rota" class="form-control" placeholder="Ex: Extrema x Betim" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Valor do Frete (R$):</label>
+                    {# Teclado numérico decimal ativado #}
+                    <input type="number" step="0.01" name="valor_frete" class="form-control" inputmode="decimal"
+                        placeholder="0,00" required>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg shadow fw-bold">
+                        Salvar Viagem
+                    </button>
+                    <a href="{% url 'home_motorista' %}" class="btn btn-light btn-lg border">Voltar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

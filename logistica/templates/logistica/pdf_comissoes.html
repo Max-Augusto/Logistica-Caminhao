@@ -1,0 +1,123 @@
+{% load l10n %}
+{{ item.ano|unlocalize }}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: a4 portrait;
+            margin: 1cm;
+        }
+
+        body {
+            font-family: Helvetica, sans-serif;
+            font-size: 10pt;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+        }
+
+        .driver-section {
+            margin-top: 30px;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        .driver-title {
+            background-color: #333;
+            color: white;
+            padding: 5px;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            text-align: left;
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        .total {
+            text-align: right;
+            font-weight: bold;
+            font-size: 12pt;
+            margin-top: 10px;
+        }
+
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 8pt;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>EXTRATO DE COMISSÕES</h1>
+        <p>Veículo: {{ caminhao.placa }} - {{ caminhao.modelo }}</p>
+        <p>Período: {{ mes_nome }} / {{ ano|unlocalize }}</p>
+    </div>
+
+    {% for motorista in extrato %}
+    <div class="driver-section">
+        <div class="driver-title">MOTORISTA: {{ motorista.nome|upper }}</div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 20%;">Data</th>
+                    <th style="width: 60%;">Origem/Destino</th>
+                    <th style="width: 20%;">Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in motorista.comissoes %}
+                <tr>
+                    <td style="width: 20%;">{{ c.data|date:"d/m/Y" }}</td>
+                    <td>
+                        {% if c.viagem_origem.rota %}
+                        {{ c.viagem_origem.rota }}
+                        {% else %}
+                        {{ c.descricao }}
+                        {% endif %}
+                    </td>
+                    <td style="width: 20%;">R$ {{ c.valor|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="total">Total do Motorista: R$ {{ motorista.total|floatformat:2 }}</div>
+    </div>
+    {% endfor %}
+
+    {% if not individual %}
+    <div style="margin-top: 40px; text-align: right; border-top: 2px solid #000; padding-top: 10px;">
+        <span style="font-size: 14pt; font-weight: bold;">TOTAL GERAL: R$ {{ total_geral|floatformat:2 }}</span>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        Gerado em: {{ data_emissao|date:"d/m/Y H:i" }}
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="card shadow p-4 border-0 rounded-4">
+                <h2 class="mb-4 fw-bold">Plano Profissional</h2>
+                
+                <div class="display-4 fw-bold my-3 text-primary">
+                    R$ {{ empresa.calcular_valor_assinatura|floatformat:2 }}<span class="fs-6 text-muted">/mês</span>
+                </div>
+                
+                <p class="text-muted">
+                    Sua empresa está no período de teste até: <br>
+                    <strong>{{ empresa.teste_ate|date:"d/m/Y" }}</strong>
+                </p>
+
+                <ul class="list-unstyled my-4 text-start ms-4">
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Acesso total ao sistema</li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Suporte prioritário</li>
+                    <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Débito automático mensal</li>
+                </ul>
+
+                <div class="d-grid gap-2">
+                    <a href="{{ link_pagamento }}" class="btn btn-primary btn-lg py-3 fw-bold shadow-sm">
+                        Ativar Assinatura Agora
+                    </a>
+                    
+                    <a href="{% url 'selecionar_caminhao' %}" class="btn btn-outline-secondary py-2">
+                        Voltar ao Painel
+                    </a>
+                </div>
+                
+                <p class="mt-4 small text-muted mb-0">
+                    <i class="bi bi-shield-lock-fill"></i> Pagamento seguro por <strong>Mercado Pago</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

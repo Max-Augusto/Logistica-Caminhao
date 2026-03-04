@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4>Pagamento via Pix</h4>
+                </div>
+                <div class="card-body">
+                    <p>Para ativar sua conta e validar o sistema, realize o pagamento de:</p>
+                    <h2 class="text-success">R$ {{ valor }}</h2>
+
+                    <div class="my-4">
+                        <img src="data:image/png;base64, {{ qr_code_base64 }}" alt="QR Code Pix" class="img-fluid" style="max-width: 250px;">
+                    </div>
+
+                    <div class="form-group text-left">
+                        <label for="pixCode">Código Pix Copia e Cola:</label>
+                        <div class="input-group">
+                            <input type="text" id="pixCode" class="form-control" value="{{ pix_copia_e_cola }}" readonly>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" onclick="copyPix()">Copiar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info mt-3">
+                        <small><i class="fas fa-info-circle"></i> Após o pagamento, o Mercado Pago validará suas credenciais de produção.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyPix() {
+    var copyText = document.getElementById("pixCode");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+    alert("Código copiado!");
+}
+</script>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load socialaccount %}
+
+{% block content %}
+<style>
+    /* Estilização específica do botão Google */
+    .btn-google {
+        background-color: #ffffff;
+        border: 1px solid #dadce0;
+        color: #3c4043;
+        font-family: 'Roboto', arial, sans-serif;
+        font-size: 16px;
+        font-weight: 500;
+        padding: 10px 24px;
+        border-radius: 4px;
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+        transition: background-color .2s, box-shadow .2s;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .btn-google:hover {
+        background-color: #f8f9fa;
+        box-shadow: 0 1px 3px 0 rgba(60,64,67,.30), 0 4px 8px 3px rgba(60,64,67,.15);
+        color: #3c4043;
+    }
+
+    .google-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 12px;
+    }
+
+    /* Ajuste para separar o "Ou" entre os botões */
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 20px 0;
+        color: #6c757d;
+    }
+
+    .divider::before, .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .divider:not(:empty)::before { margin-right: .5em; }
+    .divider:not(:empty)::after { margin-left: .5em; }
+</style>
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4">
+        <div class="card shadow border-0">
+            <div class="card-body p-4">
+                <h3 class="text-center mb-4">Acesso ao Sistema</h3>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">USUÁRIO</label>
+                        <input type="text" name="username" class="form-control form-control-lg" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label text-secondary small fw-bold">SENHA</label>
+                        <input type="password" name="password" class="form-control form-control-lg" required>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg shadow-sm">Entrar</button>
+                    </div>
+                </form>
+
+                {% if form.errors %}
+    <div class="alert alert-danger shadow-sm border-0 mb-4">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <div>
+                <strong>Erro ao entrar:</strong> 
+                Usuário ou senha incorretos. Por favor, tente novamente.
+            </div>
+        </div>
+    </div>
+{% endif %}
+                
+
+                <div class="divider">ou</div>
+
+                <div class="d-grid">
+                    <a href="{% provider_login_url 'google' %}" class="btn-google shadow-sm">
+                        <img class="google-icon" src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo">
+                        Continuar com o Google
+                    </a>
+                </div>
+            </div>
+        </div>
+        <p class="text-center mt-3 text-muted small">© 2026 Sistema Logístico</p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5">
+        <div class="card shadow border-0">
+            <div class="card-body p-4 text-center">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width="40" class="mb-3">
+                <h3 class="mb-3">Entrar com o Google</h3>
+                
+                <p class="text-muted">
+                    Você está prestes a conectar sua conta do <strong>Google</strong> ao <strong>Sistema Logístico</strong>.
+                </p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary btn-lg" type="submit">Continuar para o Sistema</button>
+                        <a href="{% url 'account_login' %}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

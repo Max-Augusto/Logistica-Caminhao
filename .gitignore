@@ -1,0 +1,21 @@
+# Ambientes Virtuais
+venv/
+env/
+.env
+
+# Banco de dados local
+*.sqlite3
+
+# Arquivos estáticos coletados
+staticfiles/
+
+# Cache do Python
+__pycache__/
+*.py[cod]
+
+# Pastas de IDEs
+.vscode/
+.idea/
+
+# Arquivos de sistema
+.DS_Store

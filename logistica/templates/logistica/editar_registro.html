@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load l10n %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow border-0">
+        <div class="card-header 
+            {% if titulo == 'Editar Viagem' %} bg-primary text-white 
+            {% elif tipo == 'abastecimento' %} bg-warning text-dark 
+            {% elif tipo == 'comissao' %} bg-info text-white 
+            {% else %} bg-danger text-white 
+            {% endif %} fw-bold">
+            <h4 class="mb-0">
+                {% if titulo == 'Editar Viagem' %}<i class="bi bi-truck"></i>{% endif %}
+                {% if tipo == 'abastecimento' %}<i class="bi bi-fuel-pump"></i>{% endif %}
+                {% if tipo == 'comissao' %}<i class="bi bi-cash-stack"></i>{% endif %}
+                {% if tipo != 'abastecimento' and tipo != 'comissao' and titulo != 'Editar Viagem' %}<i
+                    class="bi bi-tools"></i>{% endif %}
+                {{ titulo }}
+            </h4>
+        </div>
+
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="caminhao" value="{{ caminhao_id }}">
+
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label class="form-label fw-bold">Data:</label>
+                        <input type="date" name="data" class="form-control" value="{{ objeto.data|date:'Y-m-d' }}"
+                            required>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label class="form-label fw-bold">Valor R$:</label>
+                        <input type="number" step="0.01"
+                            name="{% if titulo == 'Editar Viagem' %}valor_frete{% else %}valor{% endif %}"
+                            class="form-control"
+                            value="{% if titulo == 'Editar Viagem' %}{{ objeto.valor_frete|stringformat:'.2f' }}{% else %}{{ objeto.valor|stringformat:'.2f' }}{% endif %}"
+                            required>
+                    </div>
+                </div>
+
+                {% if titulo == 'Editar Viagem' %}
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Motorista:</label>
+                    <input type="text" name="motorista" class="form-control" value="{{ objeto.motorista }}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Rota:</label>
+                    <input type="text" name="rota" class="form-control" value="{{ objeto.rota }}" required>
+                </div>
+                {% elif tipo == 'abastecimento' %}
+                <div class="row bg-light p-3 rounded mb-3 border border-warning">
+                    <div class="col-6">
+                        <label class="form-label text-dark fw-bold">KM Atual:</label>
+                        <input type="number" step="0.001" name="km_atual" class="form-control border-warning"
+                            value="{{ objeto.km_atual|stringformat:'.3f'|default:'0' }}" required>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label text-dark fw-bold">Litros:</label>
+                        <input type="number" step="0.01" name="litros" class="form-control border-warning"
+                            value="{{ objeto.litros|stringformat:'.2f'|default:'0' }}" required>
+                    </div>
+                </div>
+                <input type="hidden" name="categoria" value="abastecimento">
+                <input type="hidden" name="descricao" value="Abastecimento">
+                {% else %}
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Descrição:</label>
+                    {% if tipo == 'comissao' %}
+                    <input type="text" name="descricao" class="form-control" value="{{ objeto.descricao }}" readonly
+                        required>
+                    {% else %}
+                    <input type="text" name="descricao" class="form-control" value="{{ objeto.descricao }}" required>
+                    {% endif %}
+                </div>
+                <input type="hidden" name="categoria" value="{{ objeto.categoria }}">
+                {% endif %}
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn 
+                        {% if titulo == 'Editar Viagem' %} btn-primary 
+                        {% elif tipo == 'abastecimento' %} btn-warning 
+                        {% elif tipo == 'comissao' %} btn-info text-white 
+                        {% else %} btn-danger 
+                        {% endif %} shadow">
+                        <i class="bi bi-check-circle"></i> Salvar Alterações
+                    </button>
+
+                    <a href="{% url 'dashboard_detalhado' caminhao_id mes|unlocalize ano|unlocalize %}"
+                        class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

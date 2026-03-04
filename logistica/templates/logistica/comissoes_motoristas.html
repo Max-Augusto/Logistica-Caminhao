@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load l10n %}
+
+{% block content %}
+<style>
+    .header-flex { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; }
+    
+    @media (max-width: 576px) {
+        .header-flex { flex-direction: column; align-items: flex-start; }
+        .btn-group-mobile { display: grid; grid-template-columns: 1fr 1fr; width: 100%; gap: 8px; }
+        .select-container { width: 100%; }
+    }
+</style>
+
+<div class="header-flex mb-4">
+    <div class="d-flex flex-column select-container">
+        <h2 class="fw-bold mb-1">💰 Extrato de Comissões: {{ mes_nome }} / {{ ano|unlocalize }}</h2>
+        <div class="mt-1" style="min-width: 250px;">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-dark text-white border-dark"><i class="fas fa-truck"></i></span>
+                <select class="form-select border-dark fw-bold" id="selectCaminhao" onchange="navegarCaminhao(this.value)">
+                    {% for c in caminhoes_selector %}
+                        <option value="{{ c.id }}" {% if c.id|add:0 == caminhao_id|add:0 %}selected{% endif %}>{{ c.placa }} - {{ c.modelo }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="btn-group-mobile">
+        <a href="{% url 'gerar_pdf_comissoes_geral' caminhao_id mes_num ano %}" target="_blank" class="btn btn-primary btn-sm text-white"><i class="fas fa-file-pdf"></i>Gerar PDF 📄</a>
+        <a href="{% url 'dashboard_detalhado' caminhao_id mes_num ano %}" class="btn btn-secondary btn-sm"><i class="fas fa-arrow-left"></i> Voltar</a>
+    </div>
+</div>
+
+{% for motorista in extrato %}
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <span>👤 Motorista: <strong>{{ motorista.nome }}</strong></span>
+        <div class="d-flex align-items-center">
+            <span class="me-3">Total a Pagar: <strong>R$ {{ motorista.total|floatformat:2 }}</strong></span>
+            <a href="{% url 'gerar_pdf_comissao_individual' caminhao_id mes_num ano motorista.nome %}" target="_blank"
+                class="btn btn-outline-light btn-sm">
+                📄 Recibo
+            </a>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Data</th>
+                    <th>Descrição da Rota</th>
+                    <th class="text-end">Valor da Comissão</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in motorista.comissoes %}
+                <tr>
+                    <td>{{ c.data|date:"d/m/Y" }}</td>
+                    <td>{{ c.descricao }}</td>
+                    <td class="text-end text-primary fw-bold">R$ {{ c.valor|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% empty %}
+<div class="alert alert-warning text-center">Nenhuma comissão registrada para este período.</div>
+{% endfor %}
+
+<div class="alert alert-info text-end">
+    <h4 class="mb-0">Total Geral: <strong>R$ {{ total_geral|floatformat:2 }}</strong></h4>
+</div>
+
+<script>
+    function navegarCaminhao(novoId) {
+        if (!novoId) return;
+        let path = window.location.pathname;
+        let partes = path.split('/').filter(p => p !== "");
+        partes[2] = novoId; 
+        let novaUrl = '/' + partes.join('/').replace(/\./g, '') + '/';
+        window.location.href = novaUrl;
+    }
+</script>
+{% endblock %}

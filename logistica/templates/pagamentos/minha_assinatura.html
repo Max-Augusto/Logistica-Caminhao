@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow border-0 p-4">
+        <h3 class="fw-bold mb-4">Gerenciar Assinatura</h3>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <p class="text-secondary mb-1">Status Atual</p>
+                {% if empresa.em_dia %}
+                    <span class="badge bg-success p-2">Sua conta está Ativa</span>
+                {% else %}
+                    <span class="badge bg-danger p-2">Assinatura Pendente</span>
+                {% endif %}
+            </div>
+            
+            <div class="col-md-6 text-end">
+                <p class="text-secondary mb-1">Valor da Próxima Fatura</p>
+                <h2 class="fw-bold text-primary">R$ {{ valor_estimado|floatformat:2 }}</h2>
+                <small class="text-muted">Baseado em {{ qtd_caminhoes }} caminhões</small>
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+        {% if not empresa.assinatura_ativa %}
+            <div class="alert alert-warning">
+                Seu período de teste vence em: <strong>{{ empresa.teste_ate|date:"d/m/Y" }}</strong>
+            </div>
+            <a href="{% url 'criar_assinatura' %}" class="btn btn-primary btn-lg w-100">
+                Ativar Assinatura Agora
+            </a>
+        {% else %}
+            <p>Sua assinatura é processada via Mercado Pago.</p>
+            <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmarCancelamento">
+                Cancelar Assinatura
+            </button>
+            
+            <div class="modal fade" id="confirmarCancelamento" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Cancelamento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    Você tem certeza que deseja cancelar sua assinatura? O acesso aos recursos detalhados será interrompido.
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Manter Assinatura</button>
+                    <a href="{% url 'cancelar_assinatura' %}" class="btn btn-danger">Sim, Cancelar</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

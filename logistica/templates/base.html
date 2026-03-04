@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logística Betim</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+    
+        .navbar-brand {
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+    
+        /* Estilo para unificar o tamanho dos botões no Desktop */
+        @media (min-width: 992px) {
+            .nav-actions-container {
+                display: flex;
+                align-items: center;
+                gap: 8px; /* Espaço entre os botões */
+                margin-left: 10px;
+            }
+            /* Força os botões a terem a mesma altura e estilo no PC */
+            .nav-actions-container .btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                height: 38px; /* Altura padrão do Bootstrap para botões normais */
+                padding: 0 15px;
+                font-size: 0.9rem;
+            }
+        }
+    
+        /* Botões robustos e iguais no Mobile */
+        @media (max-width: 991px) {
+            .nav-actions-container {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+                padding: 15px 0;
+            }
+            .nav-actions-container .btn {
+                width: 100%;
+                padding: 12px !important;
+                font-size: 1.1rem !important;
+                display: block;
+            }
+            .navbar-nav .nav-item {
+                text-align: center;
+                padding: 5px 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4">
+        <div class="container">
+            <a class="navbar-brand"
+                href="{% if user.is_superuser or user.perfil.e_administrador %}{% url 'selecionar_caminhao' %}{% else %}{% url 'home_motorista' %}{% endif %}">
+                🚚 LOGÍSTICA
+            </a>
+    
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+    
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        
+                        {% if user.is_superuser or user.perfil.e_administrador %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'central_assinatura' %}active{% endif %}" 
+                               href="{% url 'central_assinatura' %}">
+                                <i class="fa-solid fa-credit-card me-1"></i> Assinatura
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link px-lg-3" href="{% url 'selecionar_caminhao' %}">Painel</a>
+                        </li>
+                        {% endif %}
+    
+                        <div class="nav-actions-container">
+                            <a href="{% url 'home_motorista' %}" class="btn btn-success fw-bold">
+                                <i class="fa-solid fa-plus me-1"></i> Registrar
+                            </a>
+    
+                            <form action="{% url 'logout' %}" method="post" class="m-0 d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger fw-bold w-100">Sair</button>
+                            </form>
+                        </div>
+    
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Entrar</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container pb-5">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

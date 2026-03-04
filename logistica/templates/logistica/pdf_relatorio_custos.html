@@ -1,0 +1,105 @@
+{% load l10n %}
+{{ item.ano|unlocalize }}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page { size: a4 portrait; margin: 1.5cm; }
+        body { font-family: Helvetica, Arial, sans-serif; color: #333; font-size: 10pt; line-height: 1.4; }
+        .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+        .title { font-size: 16pt; font-weight: bold; text-transform: uppercase; }
+        .table-container { margin-bottom: 25px; }
+        .table-title { background-color: #333; color: white; padding: 6px 10px; font-weight: bold; font-size: 11pt; text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background-color: #f2f2f2; text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
+        td { padding: 8px; border-bottom: 1px solid #eee; }
+        .text-right { text-align: right; }
+        .fw-bold { font-weight: bold; }
+        .footer-total { background-color: #444; color: white; font-weight: bold; }
+        
+        /* Caixa de Consumo */
+        .consumo-box { border: 1px solid #333; padding: 10px; background-color: #fcfcfc; }
+        .consumo-row { margin-bottom: 5px; }
+        .highlight { font-size: 12pt; color: #b00; font-weight: bold; }
+        .emissao { font-size: 8pt; color: #777; text-align: right; margin-top: 30px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="title">Relatório de Desempenho Operacional</div>
+        <div style="font-size: 12pt; margin-top: 5px;">{{ caminhao.placa }} - {{ caminhao.modelo }}</div>
+        <div>Período: {{ mes_nome }} / {{ ano|unlocalize }}</div>
+    </div>
+
+    <div class="table-container">
+        <div class="table-title">Análise de Impacto de Custos</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Categoria</th>
+                    <th class="text-right">Valor (R$)</th>
+                    <th class="text-right">Impacto (%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in tabela_impacto %}
+                <tr>
+                    <td class="fw-bold">{{ item.categoria }}</td>
+                    <td class="text-right">R$ {{ item.valor|floatformat:2 }}</td>
+                    <td class="text-right">{{ item.percentual|floatformat:1 }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="footer-total">
+                    <td class="fw-bold">FATURAMENTO TOTAL DO MÊS</td>
+                    <td colspan="2" class="text-right">R$ {{ total_frete|floatformat:2 }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="table-container">
+        <div class="table-title">Faturamento por Motorista</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Motorista</th>
+                    <th class="text-right">Valor Gerado (R$)</th>
+                    <th class="text-right">Participação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in tabela_motoristas %}
+                <tr>
+                    <td class="fw-bold">{{ m.nome }}</td>
+                    <td class="text-right">R$ {{ m.valor|floatformat:2 }}</td>
+                    <td class="text-right">{{ m.percentual|floatformat:1 }}%</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3">Nenhum registro de motorista no período.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-container">
+        <div class="table-title">Indicadores de Consumo e Rodagem</div>
+        <div class="consumo-box">
+            <div class="consumo-row">Kilometragem percorrida no mês: <strong>{{ total_km }} km</strong></div>
+            <div class="consumo-row">Total de litros consumidos: <strong>{{ total_litros|floatformat:2 }} L</strong></div>
+            <div class="consumo-row" style="margin-top: 8px; border-top: 1px dashed #ccc; padding-top: 5px;">
+                Média de Consumo: <span class="highlight">{{ media_geral|floatformat:2 }} km/L</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="emissao">
+        Documento gerado em: {{ data_emissao|date:"d/m/Y H:i" }}
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5">
+        <div class="card shadow border-0">
+            <div class="card-body p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width="32" class="mb-3">
+                    <h3 class="fw-normal">Concluir Cadastro</h3>
+                    <div class="d-inline-flex align-items-center bg-light border rounded-pill px-3 py-1 mt-2">
+                        <i class="bi bi-person-circle me-2 text-secondary"></i>
+                        <span class="small text-muted">{{ account.extra_data.email }}</span>
+                    </div>
+                </div>
+
+                <form method="post" class="mt-4">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                        {% if field.name != "email" %} {# Ocultamos o input de email pois já exibimos acima #}
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-secondary">{{ field.label }}</label>
+                            <input type="{{ field.field.widget.input_type|default:'text' }}" 
+                                   name="{{ field.name }}" 
+                                   class="form-control form-control-lg border-0 bg-light"
+                                   placeholder="{{ field.field.widget.attrs.placeholder }}"
+                                   required>
+                            {% if field.errors %}
+                                <div class="text-danger x-small mt-1">{{ field.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                            {# O e-mail precisa ser enviado no form, mas fica escondido #}
+                            <input type="hidden" name="email" value="{{ account.extra_data.email }}">
+                        {% endif %}
+                    {% endfor %}
+
+                    <div class="d-grid gap-2 mt-5">
+                        <button type="submit" class="btn btn-primary btn-lg shadow-sm py-3 fw-bold">
+                            Finalizar e Acessar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <p class="text-center mt-4 text-muted small">Protegido por Google OAuth 2.0</p>
+    </div>
+</div>
+
+<style>
+    .form-control:focus {
+        background-color: #fff !important;
+        box-shadow: 0 0 0 0.25 mil rem rgba(13, 110, 253, 0.1);
+        border: 1px solid #0d6efd !important;
+    }
+    .x-small { font-size: 0.75rem; }
+</style>
+{% endblock %}

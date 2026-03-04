@@ -1,0 +1,118 @@
+{% load l10n %}
+{{ item.ano|unlocalize }}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <style>
+        @page {
+            size: a4;
+            margin: 1cm;
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 10px;
+            color: #333;
+        }
+        .h1 { text-align: center; font-size: 16px; font-weight: bold; margin-bottom: 5px; }
+        .resumo { width: 100%; margin-bottom: 20px; border-collapse: collapse; }
+        .resumo td { border: 1px solid #ccc; padding: 8px; text-align: center; width: 20%; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background-color: #f2f2f2; color: #333; padding: 6px; text-align: left; border-bottom: 1px solid #333; }
+        td { padding: 6px; border-bottom: 1px solid #eee; }
+        
+        .secao-titulo { 
+            background-color: #444; 
+            color: white; 
+            padding: 4px 8px; 
+            font-weight: bold; 
+            margin-top: 15px; 
+            font-size: 11px;
+        }
+        .text-danger { color: #d9534f; }
+        .text-success { color: #5cb85c; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="h1">Relatório Logístico: {{ caminhao.placa }}</div>
+    <div style="text-align: center; margin-bottom: 15px;">Competência: {{ mes_nome }} / {{ ano|unlocalize }}</div>
+
+    <table class="resumo">
+        <tr>
+            <td style="background-color: #e7f3ff;">Total Fretes<br/><strong>R$ {{ total_frete|floatformat:2 }}</strong></td>
+            <td style="background-color: #e7ffff;">Comissão<br/><strong>R$ {{ total_comissao|floatformat:2 }}</strong></td>
+            <td style="background-color: #fff2f2;">Despesas<br/><strong>R$ {{ total_despesas|floatformat:2 }}</strong></td>
+            <td style="background-color: #f2f2f2;">Total Despesas<br/><strong>R$ {{ total_saidas|floatformat:2 }}</strong></td>
+            <td style="background-color: #f0fff4;">Sobra Líquida<br/><span class="text-success">R$ {{ sobra_liquida|floatformat:2 }}</span></td>
+        </tr>
+    </table>
+
+    <div class="secao-titulo">VIAGENS (FRETES)</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Info (Rota / Motorista)</th>
+                <th style="text-align: right;">Valor</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for v in viagens %}
+            <tr>
+                <td>{{ v.data|date:"d/m" }}</td>
+                <td>{{ v.rota }} ({{ v.motorista }})</td>
+                <td style="text-align: right;">R$ {{ v.valor_frete|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="secao-titulo">DETALHAMENTO DE COMISSÕES</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Descrição / Motorista</th>
+                <th style="text-align: right;">Valor</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in comissoes %}
+            <tr>
+                <td>{{ c.data|date:"d/m" }}</td>
+                <td>{{ c.viagem_origem.rota|default:"Comissão" }} ({{ c.viagem_origem.motorista }})</td>
+                <td style="text-align: right;" class="text-danger">R$ {{ c.valor|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3">Nenhuma comissão registrada.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="secao-titulo">DESPESAS OPERACIONAIS</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Descrição</th>
+                <th style="text-align: right;">Valor</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for d in despesas_operacionais %}
+            <tr>
+                <td>{{ d.data|date:"d/m" }}</td>
+                <td>{{ d.descricao }}</td>
+                <td style="text-align: right;" class="text-danger">R$ {{ d.valor|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div style="margin-top: 30px; text-align: center; font-size: 8px; color: #777;">
+        Documento gerado em {{ hoje|date:"d/m/Y H:i" }} por Sistema de Logística.
+    </div>
+</body>
+</html>

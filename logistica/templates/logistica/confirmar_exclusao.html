@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow border-0 mt-5">
+            <div class="card-body p-5 text-center">
+                <div class="text-danger mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor" class="bi bi-exclamation-octagon-fill" viewBox="0 0 16 16">
+                        <path d="M11.46.146A.5.5 0 0 0 11.107 0H4.893a.5.5 0 0 0-.353.146L.146 4.54A.5.5 0 0 0 0 4.893v6.214a.5.5 0 0 0 .146.353l4.394 4.394a.5.5 0 0 0 .353.146h6.214a.5.5 0 0 0 .353-.146l4.394-4.394a.5.5 0 0 0 .146-.353V4.893a.5.5 0 0 0-.146-.353L11.46.146zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+                    </svg>
+                </div>
+
+                <h3 class="fw-bold">Tem certeza?</h3>
+                <p class="text-muted">
+                    Você está prestes a excluir {% if tipo == 'caminhao' %}o caminhão <strong>{{ obj.placa }}</strong>{% else %}este registro{% endif %}.
+                    <br>Esta ação não pode ser desfeita.
+                </p>
+
+                <form method="POST">
+                    {% csrf_token %}
+
+                    {% if tipo == 'caminhao' %}
+                    <div class="mb-4 text-start">
+                        <label class="form-label small fw-bold text-danger text-uppercase">Senha de Administrador necessária:</label>
+                        <input type="password" name="senha_confirmacao" class="form-control border-danger" placeholder="Confirme sua senha para deletar o caminhão" required>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                        {% if tipo == 'caminhao' %}
+                            <a href="{% url 'editar_caminhao' obj.id %}" class="btn btn-light px-4 fw-bold">Cancelar</a>
+                        {% else %}
+                            <a href="{% url 'dashboard_detalhado' caminhao_id mes ano %}" class="btn btn-light px-4 fw-bold">Cancelar</a>
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-danger px-4 fw-bold">
+                            Sim, Excluir
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

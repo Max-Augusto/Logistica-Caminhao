@@ -1,0 +1,434 @@
+{% extends 'base.html' %}
+{% load l10n %}
+
+{% block content %}
+<style>
+    /* Estilos dos Cards - Ajustados para Responsividade */
+    .card-resumo {
+        border: none;
+        border-radius: 12px;
+        color: white;
+        transition: transform 0.2s ease-in-out;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100px;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .card-resumo:hover {
+        transform: translateY(-5px);
+        filter: brightness(1.1);
+    }
+
+    .bg-custom-blue {
+        background-color: #0d6efd;
+    }
+
+    .bg-custom-cyan {
+        background-color: #0dcaf0;
+    }
+
+    .bg-custom-red {
+        background-color: #dc3545;
+    }
+
+    .bg-custom-gray {
+        background-color: #6c757d;
+    }
+
+    .bg-custom-green {
+        background-color: #198754;
+    }
+
+    .small-label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        font-weight: 800;
+        margin-bottom: 5px;
+        opacity: 0.9;
+    }
+
+    .valor-card {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    @media (min-width: 768px) {
+        .valor-card {
+            font-size: 1.5rem;
+        }
+
+        .small-label {
+            font-size: 0.75rem;
+        }
+    }
+
+    .header-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    @media (max-width: 576px) {
+        .header-flex {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .btn-group-mobile {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            width: 100%;
+            gap: 8px;
+        }
+
+        .btn-group-mobile .btn-voltar {
+            grid-column: span 2;
+        }
+    }
+
+    .btn-acao {
+        text-decoration: none;
+        padding: 4px 8px;
+        display: inline-block;
+        transition: 0.2s;
+    }
+
+    .btn-acao:hover {
+        transform: scale(1.2);
+    }
+
+    .motorista-tag {
+        font-size: 0.7rem;
+        background-color: #e9ecef;
+        color: #495057;
+        padding: 2px 6px;
+        border-radius: 4px;
+        display: inline-block;
+        margin-bottom: 4px;
+        font-weight: 600;
+    }
+
+    /* Estilo para a barra de busca dentro do card */
+    .search-box {
+        padding: 8px;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+</style>
+
+<div class="header-flex mb-4">
+    <div class="d-flex flex-column">
+        
+        <h2 class="fw-bold mb-1">📊 Detalhes: {{ mes_nome }} / {{ ano|unlocalize }}</h2>
+        <div class="mt-1" style="min-width: 250px;">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-dark text-white border-dark">
+                    <i class="fas fa-truck"></i>
+                </span>
+                <select class="form-select border-dark fw-bold" id="selectCaminhao"
+                    onchange="navegarCaminhao(this.value)">
+                    {% for c in caminhoes_selector %}
+                    <option value="{{ c.id }}" {% if c.id == caminhao.id %} selected {% endif %}>
+                        {{ c.placa }} - {{ c.modelo }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>           
+        </div>
+        {% if aviso_trial <= 3 and not user.perfil.empresa.assinatura_ativa %}
+    <div class="alert alert-warning text-center">
+        Seu período de teste termina em <strong>{{ aviso_trial }} dias</strong>. 
+        <a href="{% url 'central_assinatura' %}">Assine agora</a> para não perder o acesso!
+    </div>
+{% endif %}
+    </div>
+
+    
+
+    <div class="btn-group-mobile">
+       
+        <a href="{% url 'media_consumo' caminhao.id mes_num ano %}" class="btn btn-outline-primary btn-sm">Média
+            Consumo
+        </a>
+
+        <a href="{% url 'comissoes_motoristas' caminhao.id mes_num ano %}"
+            class="btn btn-info btn-sm text-white">Comissões
+        </a>
+
+        <a href="{% url 'relatorio_custos' caminhao.id mes_num ano %}" class="btn btn-success btn-sm text-white">Gráfico Custos</a> 
+
+        <a href="{% url 'dashboard_pdf' caminhao.id mes_num ano %}" class="btn btn-primary btn-sm text-white">
+            <i class="fas fa-file-pdf"></i> Gerar PDF
+        </a>
+
+        <a href="{% url 'selecao_mes' caminhao.id ano %}" class="btn btn-secondary btn-sm btn-voltar">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="row g-2 mb-4">
+    <div class="col-12 col-md">
+        <div class="card card-resumo bg-custom-blue">
+            <span class="small-label">TOTAL FRETE</span>
+            <h4 class="valor-card">R$ {{ total_fretes|floatformat:2 }}</h4>
+        </div>
+    </div>
+    <div class="col-6 col-md">
+        <div class="card card-resumo bg-custom-cyan">
+            <span class="small-label">COMISSÃO</span>
+            <h4 class="valor-card">R$ {{ total_comissao|floatformat:2 }}</h4>
+        </div>
+    </div>
+    <div class="col-6 col-md">
+        <div class="card card-resumo bg-custom-red">
+            <span class="small-label">DESPESAS</span>
+            <h4 class="valor-card">R$ {{ outras_despesas|floatformat:2 }}</h4>
+        </div>
+    </div>
+    <div class="col-6 col-md">
+        <div class="card card-resumo bg-custom-gray">
+            <span class="small-label">TOTAL DESPESAS</span>
+            <h4 class="valor-card">R$ {{ total_saidas|floatformat:2 }}</h4>
+        </div>
+    </div>
+    <div class="col-6 col-md">
+        <div class="card card-resumo {% if sobra >= 0 %}bg-custom-green{% else %}bg-custom-red{% endif %}">
+            <span class="small-label">SOBRA LÍQUIDA</span>
+            <h4 class="valor-card">R$ {{ sobra|floatformat:2 }}</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-primary text-white fw-bold">🚚 Viagens (Fretes)</div>
+            <div class="search-box">
+                <div class="input-group input-group-sm">
+                    <input type="text" id="filtro-viagens" class="form-control"
+                        placeholder="Buscar motorista, rota ou valor...">
+                    <button class="btn btn-outline-secondary btn-limpar" data-target="filtro-viagens"
+                        type="button">✖</button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Data</th>
+                            <th>Info</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-viagens-body">
+                        {% for v in viagens %}
+                        <tr style="background-color: white !important;">
+                            <td><small>{{ v.data|date:"d/m" }}</small></td>
+                            <td>
+                                <div class="motorista-tag">👤 {{ v.motorista }}</div><br>
+                                <small class="text-muted">{{ v.rota }}</small><br>
+                                <b class="text-primary">R$ {{ v.valor_frete|floatformat:2 }}</b>
+                            </td>
+                            <td class="text-center">
+                                {% if user.is_superuser or user.perfil.e_administrador %}
+                                <a href="{% url 'editar_viagem' caminhao.id v.id mes_num ano %}" class="btn-acao">✏️</a>
+                                <a href="{% url 'excluir_viagem' caminhao.id v.id %}" class="btn-acao">🗑️</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center py-3">Nenhuma viagem.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-info text-white fw-bold">💰 Comissões</div>
+            <div class="search-box">
+                <div class="input-group input-group-sm">
+                    <input type="text" id="filtro-comissoes" class="form-control"
+                        placeholder="Buscar motorista ou valor...">
+                    <button class="btn btn-outline-secondary btn-limpar" data-target="filtro-comissoes"
+                        type="button">✖</button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Data</th>
+                            <th>Desc/Valor</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-comissoes-body">
+                        {% for c in comissoes %}
+                        <tr style="background-color: white !important;">
+                            <td><small>{{ c.data|date:"d/m" }}</small></td>
+                            <td>
+                                {% if c.viagem_origem %}
+                                <div class="motorista-tag">👤 {{ c.viagem_origem.motorista }}</div><br>
+                                {% endif %}
+                                <small>{{ c.descricao }}</small><br>
+                                <b class="text-info">R$ {{ c.valor|floatformat:2 }}</b>
+                            </td>
+                            <td class="text-center">
+                                {% if user.is_superuser or user.perfil.e_administrador %}
+                                <a href="{% url 'editar_despesa' caminhao.id c.id mes_num ano %}"
+                                    class="btn-acao">✏️</a>
+                                <a href="{% url 'excluir_despesa' caminhao.id c.id %}" class="btn-acao">🗑️</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class=" col-lg-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-danger text-white fw-bold">⛽ Despesas Operacionais
+            </div>
+            <div class="search-box">
+                <div class="input-group input-group-sm">
+                    <input type="text" id="filtro-despesas" class="form-control"
+                        placeholder="Buscar descrição ou valor...">
+                    <button class="btn btn-outline-secondary btn-limpar" data-target="filtro-despesas"
+                        type="button">✖</button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Data</th>
+                            <th>Desc/Valor</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-despesas-body">
+                        {% for d in despesas_operacionais %}
+                        <tr style="background-color: white !important;">
+                            <td><small>{{ d.data|date:"d/m" }}</small></td>
+                            <td>
+                                <div class="fw-bold" style="font-size: 0.85rem;">
+                                    {% if d.categoria == 'abastecimento' and d.km_atual %}
+                                    Abastecimento - KM {{ d.km_atual|floatformat:"1g" }}
+                                    {% else %}
+                                    {{ d.descricao }}
+                                    {% endif %}
+                                </div>
+                                <span
+                                    class="badge rounded-pill {% if d.categoria == 'abastecimento' %}bg-warning{% elif d.categoria == 'manutencao' %}bg-warning text-dark{% else %}bg-secondary{% endif %}"
+                                    style="font-size: 0.65rem;">
+                                    {{ d.get_categoria_display }}
+                                </span>
+                                {% if d.litros %}
+                                <small class="text-muted ms-1" style="font-size: 0.7rem;">
+                                    ({{d.litros|floatformat:2 }} L)</small>{% endif %}
+                                <br>
+                                <span class="text-danger fw-bold">
+                                    R$ {{d.valor|floatformat:2 }}</span>
+                            </td>
+                            <td class="text-center">
+                                {% if user.is_superuser or user.perfil.e_administrador %}
+                                <a href="{% url 'editar_despesa' caminhao.id d.id mes_num ano %}"
+                                    class="btn-acao">✏️</a>
+                                <a href="{% url 'excluir_despesa' caminhao.id d.id %}" class="btn-acao">🗑️</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center py-3">Nenhuma despesa.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function aplicarFiltro(texto, idsTabelas) {
+            const termo = texto.toLowerCase();
+            idsTabelas.forEach(id => {
+                const linhas = document.querySelectorAll(`#${id} tr`);
+                linhas.forEach(linha => {
+                    if (linha.cells.length < 2) return;
+                    const conteudo = linha.innerText.toLowerCase();
+                    linha.style.display = conteudo.includes(termo) ? "" : "none";
+                });
+            });
+        }
+
+        const inputViagens = document.getElementById('filtro-viagens');
+        const inputComissoes = document.getElementById('filtro-comissoes');
+        const inputDespesas = document.getElementById('filtro-despesas');
+
+        // Sincroniza Viagens e Comissões
+        [inputViagens, inputComissoes].forEach(input => {
+            input.addEventListener('input', function () {
+                const valor = this.value;
+                inputViagens.value = valor;
+                inputComissoes.value = valor;
+                aplicarFiltro(valor, ['tabela-viagens-body', 'tabela-comissoes-body']);
+            });
+        });
+
+        // Filtro de Despesas (Independente)
+        inputDespesas.addEventListener('input', function () {
+            aplicarFiltro(this.value, ['tabela-despesas-body']);
+        });
+
+        // Botões de Limpar
+        document.querySelectorAll('.btn-limpar').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const targetId = this.getAttribute('data-target');
+                if (targetId === 'filtro-despesas') {
+                    inputDespesas.value = "";
+                    aplicarFiltro("", ['tabela-despesas-body']);
+                } else {
+                    inputViagens.value = "";
+                    inputComissoes.value = "";
+                    aplicarFiltro("", ['tabela-viagens-body', 'tabela-comissoes-body']);
+                }
+            });
+        });
+    });
+
+    function navegarCaminhao(novoId) {
+        if (novoId) {
+            // O Django vai gerar a base da URL: /dashboard/ID/1/2026/
+            // Usamos o ID 0 como um "placeholder" para substituir via JS
+            let urlBase = "{% url 'dashboard_detalhado' 0 mes_num ano %}";
+            
+            // Removemos qualquer formatação de número (pontos) do ano e substituímos o ID
+            urlBase = urlBase.replace('0', novoId).replace('.','');
+            
+            window.location.href = urlBase;
+        }
+    }
+
+</script>
+
+{% endblock %}

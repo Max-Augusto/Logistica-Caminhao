@@ -1,0 +1,12 @@
+venv/
+env/
+.git/
+.env
+staticfiles/
+__pycache__/
+*.pyc
+db.sqlite3
+*.csv
+scripts/
+verify_refactoring.py
+dados_viagens.py

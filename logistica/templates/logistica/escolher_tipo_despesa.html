@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <h2 class="fw-bold mb-4">O que você deseja registrar?</h2>
+
+    <div class="row g-4 justify-content-center">
+        <div class="col-6 col-md-4">
+            <a href="{% url 'registrar_despesa' %}?tipo=abastecimento" class="text-decoration-none">
+                <div class="card h-100 shadow-sm border-0 bg-warning text-dark py-4 card-acao">
+                    <i class="bi bi-fuel-pump fs-1 mb-2"></i>
+                    <h5 class="fw-bold">Abastecimento</h5>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-6 col-md-4">
+            <a href="{% url 'registrar_despesa' %}?tipo=outro" class="text-decoration-none">
+                <div class="card h-100 shadow-sm border-0 bg-secondary text-white py-4 card-acao">
+                    <i class="bi bi-gear-wide-connected fs-1 mb-2"></i>
+                    <h5 class="fw-bold">Outras Despesas</h5>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="mt-5">
+        <a href="{% url 'home_motorista' %}" class="btn btn-outline-secondary">Cancelar e Voltar</a>
+    </div>
+</div>
+
+<style>
+    .card-acao {
+        transition: transform 0.2s;
+    }
+
+    .card-acao:hover {
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}

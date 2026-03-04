@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 rounded-4 p-4">
+                <h2 class="fw-bold mb-4 text-center">Minha Assinatura</h2>
+
+                <div class="d-flex align-items-center mb-4 p-3 bg-light rounded-3">
+                    <div class="flex-grow-1">
+                        <span class="text-secondary small d-block">Status Atual</span>
+                        {% if empresa.assinatura_ativa %}
+                            <strong class="text-success fs-5"><i class="bi bi-check-circle-fill"></i> Assinatura Ativa</strong>
+                        {% elif empresa.em_dia %}
+                            <strong class="text-primary fs-5"><i class="bi bi-clock-history"></i> Período de Teste (Grátis)</strong>
+                        {% else %}
+                            <strong class="text-danger fs-5"><i class="bi bi-x-circle-fill"></i> Assinatura Suspensa</strong>
+                        {% endif %}
+                    </div>
+                    <div class="text-end">
+                        <span class="text-secondary small d-block">Expira em</span>
+                        <strong>{{ empresa.teste_ate|date:"d/m/Y" }}</strong>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold mb-3">Resumo do Plano</h5>
+                <ul class="list-group list-group-flush mb-4">
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        Plano Base (Até 2 caminhões)
+                        <span>R$ 50,00</span>
+                    </li>
+                    {% if qtd_caminhoes > 2 %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        {{ qtd_caminhoes|add:"-2" }} Caminhão(ões) adicional(ais) (R$ 15,00 cada)
+                        <span>R$ {{ empresa.calcular_valor_assinatura|add:"-50"|floatformat:2 }}</span>
+                    </li>
+                    {% endif %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 fw-bold border-top-0">
+                        Total Mensal
+                        <span class="text-primary fs-4">R$ {{ empresa.calcular_valor_assinatura|floatformat:2 }}</span>
+                    </li>
+                </ul>
+
+                {% if not empresa.assinatura_ativa %}
+                    <div class="d-grid gap-2">
+                        <a href="{{ link_pagamento }}" class="btn btn-primary btn-lg py-3 fw-bold shadow-sm">
+                            Ativar Assinatura Agora
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mt-4">
+                        <button type="button" class="btn btn-outline-danger px-5 py-2 fw-bold" data-bs-toggle="modal" data-bs-target="#modalCancelar">
+                            Cancelar Assinatura
+                        </button>
+                    </div>
+                {% endif %}
+
+                <div class="text-center mt-4">
+                    <a href="{% url 'selecionar_caminhao' %}" class="btn btn-link text-decoration-none text-secondary">
+                        <i class="bi bi-arrow-left"></i> Voltar ao Painel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCancelar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-danger text-white rounded-top-4 border-0">
+                <h5 class="modal-title fw-bold">Confirmar Cancelamento</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <i class="bi bi-exclamation-triangle text-danger fs-1 mb-3 d-block"></i>
+                <p class="fs-5 mb-1">Tem certeza que deseja cancelar?</p>
+                <p class="text-muted small">A cobrança recorrente será interrompida no Mercado Pago.</p>
+            </div>
+            <div class="modal-footer border-0 pb-4 px-4">
+                <button type="button" class="btn btn-light border fw-bold flex-grow-1" data-bs-dismiss="modal">Manter</button>
+                
+                <form action="{% url 'cancelar_assinatura' %}" method="post" class="flex-grow-1 m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger fw-bold w-100">Sim, Cancelar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

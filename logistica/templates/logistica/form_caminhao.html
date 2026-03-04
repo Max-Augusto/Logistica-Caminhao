@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-dark text-white py-3">
+                    <h4 class="mb-0 fw-bold"><i class="fas fa-truck me-2"></i>{{ titulo }}</h4>
+                </div>
+                <div class="card-body p-4">
+                    
+                    {% if caminhao %}
+                    <div class="alert alert-warning border-0 shadow-sm mb-4 d-flex align-items-center" role="alert">
+                        <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                        <div>
+                            <strong class="d-block">Aviso sobre Comissão</strong>
+                            <span class="small">Alterar o percentual agora afetará apenas <strong>novas viagens</strong>. Registros antigos mantêm o cálculo original.</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <h5 class="text-primary fw-bold mb-3">Informações do Veículo</h5>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Placa</label>
+                            {{ form.placa }}
+                            {% if form.placa.errors %}<div class="text-danger small">{{ form.placa.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Modelo / Cor</label>
+                            {{ form.modelo }}
+                            {% if form.modelo.errors %}<div class="text-danger small">{{ form.modelo.errors }}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Comissão (%)</label>
+                            {{ form.comissao_percentual }}
+                            {% if form.comissao_percentual.errors %}<div class="text-danger small">{{ form.comissao_percentual.errors }}</div>{% endif %}
+                        </div>
+
+                        {% if not caminhao %}
+                        <hr>
+                        <h5 class="text-success fw-bold mb-3">Conta de Acesso do Motorista</h5>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Login (Gerado pela Placa)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fas fa-user"></i></span>
+                                <input type="text" id="id_login_motorista" class="form-control bg-light" 
+                                       name="username_motorista" readonly placeholder="Aguardando placa...">
+                            </div>
+                            <div class="form-text">O login é gerado automaticamente para evitar erros.</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Senha Inicial</label>
+                            {{ form.senha_motorista }}
+                            {% if form.senha_motorista.errors %}<div class="text-danger small">{{ form.senha_motorista.errors }}</div>{% endif %}
+                        </div>
+
+                        {% else %}
+                        <hr class="my-4">
+                        <h5 class="text-warning fw-bold mb-3"><i class="fas fa-key me-2"></i>Gestão de Acesso</h5>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Login do Motorista (Atualiza com a Placa)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="fas fa-id-badge"></i></span>
+                                <input type="text" id="id_login_motorista_edit" class="form-control bg-light" 
+                                       value="{{ caminhao.motorista_responsavel.username }}" readonly>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-danger">Redefinir Nova Senha</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock text-danger"></i></span>
+                                <input type="password" name="nova_senha_motorista" class="form-control" placeholder="Digite apenas se quiser alterar">
+                            </div>
+                            <div class="form-text small">Deixe em branco para manter a senha atual.</div>
+                        </div>
+                        {% endif %}
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold">
+                                <i class="fas fa-save me-2"></i>Salvar Caminhão
+                            </button>
+                            <a href="{% url 'selecionar_caminhao' %}" class="btn btn-light border fw-bold">
+                                Cancelar
+                            </a>
+                        </div>
+
+                        {% if caminhao %}
+                        <hr class="my-4">
+                        <div class="text-center">
+                            <p class="text-muted small">Deseja remover este veículo da frota?</p>
+                            <a href="{% url 'excluir_caminhao' caminhao.id %}" class="btn btn-outline-danger btn-sm px-4">
+                                <i class="fas fa-trash-alt me-2"></i>Excluir Caminhão Permanentemente
+                            </a>
+                        </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const campoPlaca = document.querySelector('input[name="placa"]');
+        const campoLoginCriacao = document.getElementById('id_login_motorista');
+        const campoLoginEdicao = document.getElementById('id_login_motorista_edit');
+
+        if (campoPlaca) {
+            campoPlaca.addEventListener('input', function() {
+                let valorFormatado = this.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+                this.value = valorFormatado;
+
+                if (campoLoginCriacao) {
+                    campoLoginCriacao.value = valorFormatado;
+                }
+                if (campoLoginEdicao) {
+                    campoLoginEdicao.value = valorFormatado;
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

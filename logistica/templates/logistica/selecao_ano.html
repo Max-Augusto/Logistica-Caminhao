@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load l10n %}
+
+{% block content %}
+<style>
+    .header-flex { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; }
+    
+    @media (max-width: 576px) {
+        .header-flex { flex-direction: column; align-items: flex-start; }
+        .btn-group-mobile { width: 100%; }
+        .btn-group-mobile .btn { width: 100%; }
+        .select-container { width: 100%; }
+    }
+
+    .card-ano {
+        transition: transform 0.2s;
+        border-left: 5px solid #0d6efd;
+    }
+    .card-ano:hover { transform: translateY(-5px); }
+</style>
+
+<div class="header-flex mb-4">
+    <div class="d-flex flex-column select-container">
+        <h2 class="fw-bold mb-1">📂 Painel Anual</h2>
+        
+        <div class="mt-1" style="min-width: 250px;">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-dark text-white border-dark"><i class="fas fa-truck"></i></span>
+                <select class="form-select border-dark fw-bold" onchange="navegarCaminhaoAno(this.value)">
+                    {% for c in caminhoes_selector %}
+                    <option value="{{ c.id }}" {% if c.id == caminhao.id %} selected {% endif %}>
+                        {{ c.placa }} - {{ c.modelo }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="btn-group-mobile">
+        <a href="{% url 'selecionar_caminhao' %}" class="btn btn-secondary btn-sm shadow-sm">
+            <i class="fas fa-arrow-left"></i> Voltar para Veículos
+        </a>
+    </div>
+</div>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for item in dados_anos %}
+    <div class="col">
+        <div class="card h-100 shadow-sm border-0 card-ano">
+            <div class="card-header bg-primary text-white text-center fw-bold py-3">
+                ANO {{ item.ano|unlocalize }}
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted small">Faturamento:</span>
+                    <span class="text-primary fw-bold">R$ {{ item.frete|floatformat:2 }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-muted small">Despesas:</span>
+                    <span class="text-danger fw-bold">R$ {{ item.saidas|floatformat:2 }}</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold small">SOBRA:</span>
+                    <span class="fw-bold fs-5 {% if item.sobra >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        R$ {{ item.sobra|floatformat:2 }}
+                    </span>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-0 pb-3">
+                <a href="{% url 'selecao_mes' caminhao.id item.ano %}" class="btn btn-outline-primary w-100 fw-bold">
+                    <i class="fas fa-calendar-alt me-1"></i> Ver Meses
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+        <div class="alert alert-info shadow-sm">Nenhum registro para este caminhão.</div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    function navegarCaminhaoAno(novoId) {
+        if (!novoId) return;
+        // Padrão esperado: /painel/<id>/anos/
+        const urlBase = "{% url 'selecao_ano' 0 %}".replace('0', novoId);
+        window.location.href = urlBase;
+    }
+</script>
+{% endblock %}

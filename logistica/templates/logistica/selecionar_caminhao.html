@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold">🚚 Frota de Veículos</h2>
+        <p class="text-muted">Selecione um caminhão para gerenciar o painel</p>
+        <a href="{% url 'adicionar_caminhao' %}" class="btn btn-success shadow-sm fw-bold">
+            <i class="fas fa-plus"></i> Novo Caminhão
+        </a>
+        
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        {% for c in caminhoes %}
+        <div class="col-md-4 col-lg-3">
+            <div class="card h-100 shadow-sm border-0 text-center p-3 card-kpi" style="transition: 0.3s;">
+                <div class="card-body">
+                    <div class="icon-circle bg-primary text-white mx-auto mb-3" style="width: 70px; height: 70px;">
+                        <i class="bi bi-truck fs-2"></i>
+                    </div>
+                    <h4 class="fw-bold mb-1 text-uppercase">{{ c.placa }}</h4>
+                    <p class="text-muted small mb-4">{{ c.modelo }}</p>
+                    
+
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'selecao_ano' c.id %}" class="btn btn-primary fw-bold">Ver Dashboard</a>
+                        <a href="{% url 'editar_caminhao' c.id %}" class="btn btn-light border btn-sm">
+                            <i class="fas fa-cog me-1"></i> Configurações do Caminhão
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .card-kpi:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .icon-circle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+</style>
+{% endblock %}
